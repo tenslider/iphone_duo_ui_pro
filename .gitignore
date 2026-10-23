@@ -8,6 +8,10 @@ doc/api/
 # iOS / CocoaPods
 ios/Pods/
 ios/.symlinks/
+
+# Swift Package Manager
+.build/
+.swiftpm/
 ios/Flutter/Flutter.framework
 ios/Flutter/Flutter.podspec
 **/*.xcworkspace/xcuserdata/

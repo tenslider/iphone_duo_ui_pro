@@ -43,11 +43,5 @@ post_install do |installer|
     target.build_configurations.each do |config|
       config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
     end
-    # iPhone Duo APIs (iOS 27.1 SDK) — the same snippet the package README documents.
-    if target.name == 'iphone_duo_ui_pro'
-      target.build_configurations.each do |config|
-        config.build_settings['SWIFT_ACTIVE_COMPILATION_CONDITIONS'] = '$(inherited) DUO_SDK_27_1'
-      end
-    end
   end
 end

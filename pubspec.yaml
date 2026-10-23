@@ -3,7 +3,7 @@ description: >-
   Fold-aware Flutter widgets for iPhone Duo: two-pane layouts, fold-aligned
   grids, and vertical bars in two modes, custom Flutter navigation or official
   Liquid Glass.
-version: 0.3.0
+version: 1.0.0
 repository: https://github.com/szymdzie/iphone_duo_ui_pro
 issue_tracker: https://github.com/szymdzie/iphone_duo_ui_pro/issues
 # The first screenshot is the thumbnail pub.dev shows in search results.
@@ -17,11 +17,11 @@ screenshots:
   - description: 'The example while the simulator folds and unfolds. The angle in the caption is the one the native bridge reported.'
     path: screenshots/fold.gif
 topics:
+  - iphone-duo
   - foldable
   - ios
   - layout
   - adaptive
-  - responsive
 
 environment:
   sdk: ^3.10.0

@@ -31,11 +31,17 @@ class DuoDisplayFeatures extends StatelessWidget {
   Widget build(BuildContext context) {
     final environment = DuoScope.of(context);
     final mediaQuery = MediaQuery.of(context);
-    final injected = duoDisplayFeaturesFor(
-      environment,
-      mediaQuery.size,
-      includeOcclusions: includeOcclusions,
-    );
+    final injected =
+        duoDisplayFeaturesFor(
+              environment,
+              mediaQuery.size,
+              includeOcclusions: includeOcclusions,
+            )
+            .where(
+              (feature) =>
+                  !_alreadyReported(mediaQuery.displayFeatures, feature),
+            )
+            .toList();
     if (injected.isEmpty) return child;
     return MediaQuery(
       data: mediaQuery.copyWith(
@@ -47,6 +53,20 @@ class DuoDisplayFeatures extends StatelessWidget {
       child: child,
     );
   }
+}
+
+/// Whether the platform already reports a feature of the same kind.
+///
+/// Android fills `displayFeatures` itself, and Flutter may start doing the same on iPhone Duo
+/// (flutter/flutter#193025). The bridge then only adds what the platform leaves out, so a fold is
+/// never reported twice and dialogs do not split around a double hinge.
+bool _alreadyReported(List<DisplayFeature> reported, DisplayFeature feature) {
+  final isFold = feature.type != DisplayFeatureType.cutout;
+  return reported.any(
+    (existing) =>
+        (existing.type != DisplayFeatureType.cutout) == isFold &&
+        (isFold || existing.bounds.overlaps(feature.bounds)),
+  );
 }
 
 /// Maps reserved regions to [DisplayFeature]s:

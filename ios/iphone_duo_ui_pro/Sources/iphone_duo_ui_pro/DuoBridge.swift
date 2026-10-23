@@ -1,12 +1,15 @@
 // DuoBridge.swift - the iPhone Duo bridge for Flutter (package: iphone_duo_ui_pro).
 //
 // Registration is automatic: Flutter's GeneratedPluginRegistrant registers this plugin, so an app
-// only needs the dependency and a pod install. No app-side wiring is required.
+// only needs the dependency. CocoaPods and Swift Package Manager are both supported.
 //
-// Build flag:
-//  * Xcode 27.1+: add DUO_SDK_27_1 to SWIFT_ACTIVE_COMPILATION_CONDITIONS for this pod to enable
-//    reserved regions, the vertical bar edge and the hinge (see README.md). Those call sites come
-//    from Apple's iPhone Duo Tech Talk code and were verified against the iOS 27.1 SDK.
+// SDK detection:
+//  * Reserved regions, the vertical bar edge and the hinge need the iOS 27.1 SDK. The bridge turns
+//    them on by itself when it is compiled against that SDK: the 27.1 frameworks carry module
+//    versions UIKit 9127.0.85 and SwiftUI 8.0.85, while 27.0 ships 9127.0.84 and 8.0.84 (read from
+//    both simulator runtimes). With Xcode 27.0 or older the same source compiles without them.
+//  * Mac Catalyst is excluded: Xcode 27.1 does not offer the iOS 27.1 APIs there (185924957).
+//  * DUO_SDK_27_1 in SWIFT_ACTIVE_COMPILATION_CONDITIONS still forces them on, as in 0.3.0.
 //
 // Channels:
 //  * EventChannel  "iphone_duo/environment" - environment state maps (DuoEnvironment.fromMap in Dart).
@@ -165,7 +168,7 @@ enum DuoPayload {
     }
 
     static func uikitVerticalBarEdge(of host: UIViewController) -> String {
-        #if DUO_SDK_27_1
+        #if DUO_SDK_27_1 || (canImport(UIKit, _version: 9127.0.85) && canImport(SwiftUI, _version: 8.0.85) && !targetEnvironment(macCatalyst))
         if #available(iOS 27.1, *) {
             // Verified against the iOS 27.1 SDK (compiled and observed on the simulator): trait from the "Raise the bar with iPhone Duo" Tech Talk (kept as text).
             return String(describing: host.traitCollection.verticalBarEdge)
@@ -197,7 +200,7 @@ struct DuoRect: Equatable, Sendable {
 @available(iOS 17.0, *)
 enum DuoProbeFactory {
     static func makeController(onPayload: @escaping ([String: Any]) -> Void) -> UIViewController {
-        #if DUO_SDK_27_1
+        #if DUO_SDK_27_1 || (canImport(UIKit, _version: 9127.0.85) && canImport(SwiftUI, _version: 8.0.85) && !targetEnvironment(macCatalyst))
         if #available(iOS 27.1, *) {
             return UIHostingController(rootView: DuoProbe271(onPayload: onPayload))
         }
@@ -246,7 +249,7 @@ struct DuoProbeBase: View {
 
 // MARK: - Probe: iOS 27.1 (reserved regions, toolbarVerticalEdge, hinge)
 
-#if DUO_SDK_27_1
+#if DUO_SDK_27_1 || (canImport(UIKit, _version: 9127.0.85) && canImport(SwiftUI, _version: 8.0.85) && !targetEnvironment(macCatalyst))
 @available(iOS 27.1, *)
 struct DuoRegionsSnapshot: Equatable, Sendable {
     var activeDivisions: [DuoRect] = []

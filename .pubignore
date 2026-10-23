@@ -8,6 +8,10 @@ tool/
 .github/
 ios/Pods/
 ios/.symlinks/
+
+# Swift Package Manager
+.build/
+.swiftpm/
 example/.dart_tool/
 example/build/
 example/ios/Pods/

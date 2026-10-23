@@ -7,7 +7,7 @@
 // 84x170 pt (outer) or 84x120 pt (inner); the home indicator adds 34 pt.
 // See README.md for the full source list.
 
-import 'dart:ui' show DisplayFeatureState, DisplayFeatureType;
+import 'dart:ui' show DisplayFeature, DisplayFeatureState, DisplayFeatureType;
 
 import 'package:iphone_duo_ui_pro/iphone_duo_ui_pro.dart';
 import 'package:flutter/material.dart';
@@ -981,4 +981,46 @@ void main() {
       },
     );
   });
+
+  testWidgets(
+    'DuoDisplayFeatures does not add a fold the platform already reports',
+    (tester) async {
+      setLogicalSize(tester, innerLandscape);
+      const platformFold = DisplayFeature(
+        bounds: Rect.fromLTWH(foldStart, 0, foldWidth, 669),
+        type: DisplayFeatureType.hinge,
+        state: DisplayFeatureState.postureHalfOpened,
+      );
+      late List<DisplayFeature> seen;
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(
+            size: innerLandscape,
+            displayFeatures: [platformFold],
+          ),
+          child: DuoScope(
+            environment: foldEnvironment(
+              active: true,
+            ).copyWith(occlusions: innerOcclusions),
+            child: DuoDisplayFeatures(
+              child: Builder(
+                builder: (context) {
+                  seen = MediaQuery.displayFeaturesOf(context);
+                  return const SizedBox();
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+      expect(seen.where((f) => f.type != DisplayFeatureType.cutout), [
+        platformFold,
+      ]);
+      // The camera is still added: the platform did not report it.
+      expect(
+        seen.where((f) => f.type == DisplayFeatureType.cutout),
+        hasLength(1),
+      );
+    },
+  );
 }

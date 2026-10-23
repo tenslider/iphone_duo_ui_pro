@@ -68,7 +68,10 @@ MaterialApp(
 ```
 
 That is the whole installation. The plugin registers itself through Flutter's
-`GeneratedPluginRegistrant`, so there is no app-side Swift to write. On platforms without the bridge
+`GeneratedPluginRegistrant`, so there is no app-side Swift to write. It builds with Swift Package
+Manager on Flutter 3.44 and later, where that is the default, and with CocoaPods on Flutter 3.38 to
+3.43 or whenever Swift Package Manager is turned off. Built with Xcode 27.1 or later, the bridge
+turns the iPhone Duo APIs on by itself; there is nothing to add to the `Podfile`. On platforms without the bridge
 `DuoScope` reports `DuoEnvironment.unavailable` and every widget falls back to its plain layout, so
 the same code keeps working on a regular iPhone, on Android and in tests.
 
@@ -106,6 +109,12 @@ current fold would be captured by the route and end up in the wrong half.
 On the outer display, and on the inner display in landscape, the system moves toolbars, navigation
 and tab bars to the side. `DuoAdaptiveScaffold` follows: the same actions, in the order Apple
 specifies, with an icon and a label on each so they read identically in the overflow menu.
+
+Flutter draws its own bars, so the system will not move them for you. Apple's answer for custom bars
+in the [iPhone Duo Group Lab](https://developer.apple.com/forums/thread/847644) is to read
+`toolbarVerticalEdge` / `verticalBarEdge` and the reserved regions, and place the bar yourself
+rather than assume the safe area reserves the space. That is what the bridge reports and what
+`DuoAdaptiveScaffold` does.
 
 ```dart
 DuoAdaptiveScaffold(
@@ -232,31 +241,26 @@ FoldAlignedGrid(
 | `hinge` | Hinge status and angle, or `null` on a device without one. |
 | `verticalBarEdgeKnown`, `barEdgeFor(direction)` | Which physical edge the system put its bars on. |
 
-## iOS 27.1 and the `DUO_SDK_27_1` flag
+## iOS 27.1 SDK detection
 
-Reserved regions, the vertical bar edge and the hinge ship with the **iOS 27.1 SDK**. Until every
-build machine has Xcode 27.1, those call sites stay behind a compilation condition — `#available`
-alone is not enough, because the symbols do not exist in the 27.0 SDK and the compiler stops at
-"cannot find … in scope". Turn them on in your `ios/Podfile`:
+Reserved regions, the vertical bar edge and the hinge ship with the **iOS 27.1 SDK**. `#available`
+alone is not enough to use them from a library, because the symbols do not exist in older SDKs and
+the compiler stops at "cannot find … in scope". So the bridge checks which SDK it is compiled
+against: the iOS 27.1 frameworks carry the module versions UIKit 9127.0.85 and SwiftUI 8.0.85, while
+iOS 27.0 ships 9127.0.84 and 8.0.84. With Xcode 27.1 or later the iPhone Duo code is compiled in;
+with an older Xcode the same source compiles without it. Mac Catalyst is left out, because Xcode 27.1
+does not offer the iOS 27.1 APIs there.
 
-```ruby
-post_install do |installer|
-  installer.pods_project.targets.each do |target|
-    next unless target.name == 'iphone_duo_ui_pro'
-    target.build_configurations.each do |config|
-      config.build_settings['SWIFT_ACTIVE_COMPILATION_CONDITIONS'] = '$(inherited) DUO_SDK_27_1'
-    end
-  end
-end
-```
-
-Without the flag the bridge still reports size classes and the view size, so `DuoAdaptiveScaffold`
+Without those APIs the bridge still reports size classes and the view size, so `DuoAdaptiveScaffold`
 and `FoldAwareTwoPane` keep working; folds simply never appear. On Android, `displayFeatures` comes
 from Flutter itself, so `FoldAlignedGrid` works there with no bridge at all.
 
-**Status:** the bridge compiles against the iOS 27.1 SDK (Xcode 27.1) with the flag on and no
-warnings, and every value below was observed on the iPhone Duo simulator through Device Hub. A
-physical device has not been tested yet.
+Version 0.3.0 asked for a `DUO_SDK_27_1` flag in the `Podfile`. It is no longer needed; if it is
+still there, it does no harm and keeps forcing the same code on.
+
+**Status:** the bridge compiles against the iOS 27.1 SDK of the released Xcode 27.1 (27A9275) with no
+warnings, under Swift Package Manager (Flutter 3.47) and CocoaPods (Flutter 3.38 and 3.47), and every value below was observed on the
+iPhone Duo simulator through Device Hub. A physical device has not been tested yet.
 
 ## Testing without the device
 
@@ -281,7 +285,7 @@ await tester.pumpWidget(
 );
 ```
 
-The package ships 34 tests built this way, covering both poses, RTL, Split View halves, overflow
+The package ships 35 tests built this way, covering both poses, RTL, Split View halves, overflow
 priorities and state preservation across layout switches.
 
 ## Configurations at a glance
@@ -306,10 +310,13 @@ Measured on the simulator, for previews and tests — never for hard-coding layo
 
 ## Building with Xcode 27.1
 
-Two things bite today. Xcode 27.1 rejects deployment targets below iOS 15, so raise
-`IPHONEOS_DEPLOYMENT_TARGET` in the Runner project and force it for pods in `post_install`. And
-Flutter 3.38's `flutter build ios --simulator` stops at "does not contain architectures" because the
-new `lipo` prints them in a different order; building one architecture avoids it:
+Xcode 27.1 rejects deployment targets below iOS 15. Projects created with Flutter 3.47 already target
+iOS 15; in older ones, raise `IPHONEOS_DEPLOYMENT_TARGET` in the Runner project and, with CocoaPods,
+force it for pods in `post_install`.
+
+On Flutter 3.38, `flutter build ios --simulator` stops at "does not contain architectures" because
+the new `lipo` prints them in a different order. Flutter 3.47 builds without it. On 3.38, building
+one architecture avoids it:
 
 ```sh
 xcodebuild -workspace ios/Runner.xcworkspace -scheme Runner -configuration Debug \
@@ -317,7 +324,7 @@ xcodebuild -workspace ios/Runner.xcworkspace -scheme Runner -configuration Debug
   ARCHS=arm64 ONLY_ACTIVE_ARCH=YES CODE_SIGNING_ALLOWED=NO build
 ```
 
-`example/ios/Podfile` shows both settings.
+`example/ios/Podfile` shows the deployment target setting.
 
 ## Sources
 

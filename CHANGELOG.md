@@ -1,3 +1,19 @@
+## 1.0.0
+
+First stable release, for iPhone Duo's launch: ready for the released Xcode 27.1 and for Swift
+Package Manager. The public API is stable from here on; breaking changes will wait for 2.0.0.
+
+* **Swift Package Manager.** The iOS plugin now ships a `Package.swift`, which Flutter 3.44 and later
+  use by default. Flutter 3.38 to 3.43 keep building it through CocoaPods.
+* **No more `Podfile` flag.** The bridge detects the iOS 27.1 SDK by itself (UIKit 9127.0.85 and
+  SwiftUI 8.0.85 or later; iOS 27.0 ships 9127.0.84 and 8.0.84) and compiles the iPhone Duo code in.
+  With an older Xcode it compiles without it, as before. Mac Catalyst is excluded, since Xcode 27.1
+  does not offer the iOS 27.1 APIs there. A `DUO_SDK_27_1` flag left in a `Podfile` is harmless.
+* `DuoDisplayFeatures` no longer adds a fold or camera the platform already reports, so a fold is
+  never doubled once Flutter fills `displayFeatures` on iOS itself (flutter/flutter#193025), and
+  Android keeps its own.
+* `iphone-duo` topic on pub.dev.
+
 ## 0.3.0
 
 Two modes for the bars: custom navigation, as before, or official Liquid Glass.
