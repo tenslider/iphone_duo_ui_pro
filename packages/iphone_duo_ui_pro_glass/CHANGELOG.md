@@ -1,3 +1,13 @@
+## 0.1.1
+
+* Requires `adaptive_platform_ui` 1.0.2, which brings the vertical bar to an app in the left pane
+  of Split View, keeps the page body clear of that bar, and matches the system's 84 pt strip.
+* Requires `iphone_duo_ui_pro` 1.0.0: with Xcode 27.1 the iPhone Duo APIs turn on by themselves, so
+  the `DUO_SDK_27_1` flag is gone from the setup and from the example's `Podfile`.
+* The body is no longer wrapped to build only the visible tab: `adaptive_platform_ui` 1.0.2 mounts it
+  once. A scaffold kept in a hidden page of an app's own `IndexedStack` now keeps its body and its
+  state.
+
 ## 0.1.0
 
 First release: the Liquid Glass mode of `iphone_duo_ui_pro`, next to its custom navigation mode.

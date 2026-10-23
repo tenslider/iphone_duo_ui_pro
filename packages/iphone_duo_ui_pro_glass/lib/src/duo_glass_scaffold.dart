@@ -339,9 +339,7 @@ class DuoGlassScaffold extends StatelessWidget {
       // taken the strip out of the padding, so nothing is inset twice. Top and
       // bottom stay in MediaQuery: scroll views run under the glass and pad
       // their own content, as on iOS.
-      body: _ActiveTabOnly(
-        child: SafeArea(top: false, bottom: false, child: body),
-      ),
+      body: SafeArea(top: false, bottom: false, child: body),
     );
 
     final backdrop = this.backdrop;
@@ -372,23 +370,6 @@ class DuoGlassScaffold extends StatelessWidget {
       ],
     );
   }
-}
-
-/// Builds [child] only where it can be seen.
-///
-/// With a tab bar, adaptive_platform_ui puts one copy of the body per tab into
-/// an `IndexedStack` and shows the selected one. The copies behind it would be
-/// built and laid out for nothing, each with its own state and scroll
-/// position. The scaffold is re-created on every tab change, so the hidden
-/// copies never become visible and there is no state to keep in them.
-class _ActiveTabOnly extends StatelessWidget {
-  const _ActiveTabOnly({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) =>
-      Visibility.of(context) ? child : const SizedBox.shrink();
 }
 
 /// The title band of iPhone Duo with the text-only actions at its trailing

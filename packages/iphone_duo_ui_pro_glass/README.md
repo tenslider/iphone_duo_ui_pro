@@ -73,10 +73,9 @@ AdaptiveApp(
 ```
 
 The import re-exports `iphone_duo_ui_pro`, so it is the only one you need. The iOS side is the
-core package's: a deployment target of iOS 15, the UIScene life cycle, and the `DUO_SDK_27_1`
-flag for the iPhone Duo APIs. Its
-[README](https://pub.dev/packages/iphone_duo_ui_pro#ios-271-and-the-duo_sdk_27_1-flag) has the
-Podfile snippet.
+core package's: a deployment target of iOS 15 and the UIScene life cycle. Built with Xcode 27.1 or
+later, the iPhone Duo APIs turn on by themselves, with nothing to add to the `Podfile`; the core
+[README](https://pub.dev/packages/iphone_duo_ui_pro#ios-271-sdk-detection) explains how.
 
 ## The scaffold
 
@@ -150,10 +149,9 @@ The fallbacks are `adaptive_platform_ui`'s. The content widgets behave the same 
 - **The pose is decided once, above the pages.** `DuoGlassHost.poseOf(context)` returns it.
   A page cannot work it out from its own `MediaQuery`: inside a scaffold the top of `viewPadding`
   already includes the title band.
-- **The body is built once.** With a tab bar, `adaptive_platform_ui` keeps one copy of the body per
-  tab in an `IndexedStack`. The scaffold builds only the visible one, so a heavy screen or a
-  `GlobalKey` in the body is safe. The scaffold is re-created on every tab change; keep the state
-  you care about above it.
+- **The body is built once.** Since 1.0.2, `adaptive_platform_ui` mounts the body a single time
+  instead of once per tab, so a heavy screen or a `GlobalKey` in the body is safe. Switching tabs
+  swaps the body you pass; keep the state you care about above the scaffold.
 - **Not everything maps.** Bar buttons have no badge and no disabled style, so
   `DuoBarAction.badgeCount` is ignored and an action without `onPressed` stays tappable and does
   nothing. Tab badges work.

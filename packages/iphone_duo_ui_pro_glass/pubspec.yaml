@@ -3,7 +3,7 @@ description: >-
   The Liquid Glass mode of iphone_duo_ui_pro: official UIKit bars, glass
   capsules in the iPhone Duo vertical bar, through adaptive_platform_ui, over
   fold-aware Flutter content.
-version: 0.1.0
+version: 0.1.1
 repository: https://github.com/szymdzie/iphone_duo_ui_pro/tree/main/packages/iphone_duo_ui_pro_glass
 issue_tracker: https://github.com/szymdzie/iphone_duo_ui_pro/issues
 # The first screenshot is the thumbnail pub.dev shows in search results.
@@ -34,8 +34,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  adaptive_platform_ui: ^1.0.1
-  iphone_duo_ui_pro: ^0.3.0
+  adaptive_platform_ui: ^1.0.2
+  iphone_duo_ui_pro: ^1.0.0
 
 dev_dependencies:
   flutter_test:
